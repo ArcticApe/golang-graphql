@@ -14,9 +14,11 @@ import (
 // LiveCarbonIntensity is the resolver for the liveCarbonIntensity field.
 func (r *queryResolver) LiveCarbonIntensity(ctx context.Context, zone string) (*model.CarbonIntensity, error) {
 	param := electricitymap.TypAPIParams{Zone: zone}
-	ci, _ := electricitymap.GetLiveCarbonIntensity(param)
-	resultCI := model.CarbonIntensity{CarbonIntensity: &ci.CarbonIntensity, Zone: &ci.Zone, Datetime: &ci.Datetime, UpdatedAt: &ci.UpdatedAt, CreatedAt: &ci.UpdatedAt}
-	return &resultCI, nil
+	ci, err := electricitymap.GetLiveCarbonIntensity(param)
+	if err != nil {
+		return nil, err
+	}
+	return &ci, nil
 }
 
 // Query returns generated.QueryResolver implementation.

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/golang-graphql/datasource/http"
+	"github.com/golang-graphql/graph/model"
 
 	"strconv"
 )
@@ -13,11 +14,11 @@ var (
 	url = "https://api.electricitymap.org/v3"
 )
 
-func httpQueryBuilder(zoneKey string, params TypAPIParams) (header map[string]string, query map[string]string) {
+func httpQueryBuilder(authtoken string, params TypAPIParams) (header map[string]string, query map[string]string) {
 	header = make(map[string]string)
 	query = make(map[string]string)
 
-	header["auth-token"] = zoneKey
+	header["auth-token"] = authtoken
 
 	if params.Zone != "" {
 		query["zone"] = params.Zone
@@ -35,7 +36,7 @@ func httpQueryBuilder(zoneKey string, params TypAPIParams) (header map[string]st
 	if params.End != "" {
 		query["end"] = params.End
 	}
-	if params.EstimationFallback == true {
+	if params.EstimationFallback {
 		query["estimationFallback"] = strconv.FormatBool(params.EstimationFallback)
 	}
 
@@ -50,9 +51,9 @@ zone | A string representing the zone identifier
 lon | Longitude (if querying with a geolocation)
 lat | Latitude (if querying with a geolocation)
 */
-func GetLiveCarbonIntensity(params TypAPIParams) (TypCI, error) {
+func GetLiveCarbonIntensity(params TypAPIParams) (model.CarbonIntensity, error) {
 	url := fmt.Sprintf("%v/carbon-intensity/latest", url)
-	var data TypCI
+	var data model.CarbonIntensity
 
 	header, query := httpQueryBuilder(os.Getenv("AUTH_TOKEN"), params)
 
@@ -76,96 +77,4 @@ type TypAPIParams struct {
 	Start              string
 	End                string
 	EstimationFallback bool
-}
-
-type TypCI struct {
-	Zone            string `json:"zone"`
-	CarbonIntensity int    `json:"carbonIntensity"`
-	Datetime        string `json:"datetime"`
-	UpdatedAt       string `json:"updatedAt"`
-	CreatedAt       string `json:"createdAt"`
-}
-
-type TypPB struct {
-	Zone                      string                       `json:"zone"`
-	Datetime                  string                       `json:"datetime"`
-	PowerProductionBreakdown  TypPowerProductionBreakdown  `json:"powerProductionBreakdown"`
-	PowerProductionTotal      int                          `json:"powerProductionTotal"`
-	PowerConsumptionBreakdown TypPowerConsumptionBreakdown `json:"powerConsumptionBreakdown"`
-	PowerConsumptionTotal     int                          `json:"powerConsumptionTotal"`
-	PowerImportBreakdown      TypPowerImpExpBreakdown      `json:"powerImportBreakdown"`
-	PowerImportTotal          int                          `json:"powerImportTotal"`
-	PowerExportBreakdown      TypPowerImpExpBreakdown      `json:"powerExportBreakdown"`
-	PowerExportTotal          int                          `json:"powerExportTotal"`
-	FossilFreePercentage      int                          `json:"fossilFreePercentage"`
-	RenewablePercentage       int                          `json:"renewablePercentage"`
-	UpdatedAt                 string                       `json:"updatedAt"`
-	CreatedAt                 string                       `json:"createdAt"`
-}
-
-type TypPowerConsumptionBreakdown struct {
-	BatteryDischarge string // battery discharge `json:"batteryDischarge"`
-	Biomass          int    `json:"biomass"`
-	Coal             int    `json:"coal"`
-	Gas              int    `json:"gas"`
-	Geothermal       int    `json:"geothermal"`
-	Hydro            int    `json:"hydro"`
-	HydroDischarge   int    //hydro discharge `json:"hydroDischarge"`
-	Nuclear          int    `json:"nuclear"`
-	Oil              int    `json:"oil"`
-	Solar            int    `json:"solar"`
-	Unknown          int    `json:"unknown"`
-	Wind             int    `json:"wind"`
-}
-
-type TypPowerImpExpBreakdown struct {
-	DE     int `json:"DE"`
-	DK_DK1 int //DK-DK1 `json:"DK_DK1"`
-	SE     int `json:"SE"`
-}
-
-type TypPowerProductionBreakdown struct {
-	Biomass    int `json:"biomass"`
-	Coal       int `json:"coal"`
-	Gas        int `json:"gas"`
-	Geothermal int `json:"geothermal"`
-	Hydro      int `json:"hydro"`
-	Nuclear    int `json:"nuclear"`
-	Oil        int `json:"oil"`
-	Solar      int `json:"solar"`
-	Unknown    int `json:"unknown"`
-	Wind       int `json:"wind"`
-}
-
-type TypZone struct {
-	CountryName string   `json:"countryName"`
-	ZoneName    string   `json:"zoneName"`
-	Access      []string `json:"access"`
-}
-
-type TypRecentCI struct {
-	Zone    string `json:"zone"`
-	History []struct {
-		CarbonIntensity int    `json:"carbonIntensity"`
-		Datetime        string `json:"datetime"`
-		UpdatedAt       string `json:"updatedAt"`
-		CreatedAt       string `json:"createdAt"`
-	} `json:"history"`
-}
-
-type TypRecentPB struct {
-	Zone    string `json:"zone"`
-	History []struct {
-		Datetime                  string                       `json:"datetime"`
-		FossilFreePercentage      string                       `json:"fossilFreePercentage"`
-		PowerConsumptionBreakdown TypPowerConsumptionBreakdown `json:"powerConsumptionBreakdown"`
-		PowerConsumptionTotal     int                          `json:"powerConsumptionTotal"`
-		PowerImportBreakdown      TypPowerImpExpBreakdown      `json:"powerImportBreakdown"`
-		PowerImportTotal          int                          `json:"powerImportTotal"`
-		PowerExportBreakdown      TypPowerImpExpBreakdown      `json:"powerExportBreakdown"`
-		PowerExportTotal          int                          `json:"powerExportTotal"`
-		PowerProductionBreakdown  TypPowerProductionBreakdown  `json:"powerProductionBreakdown"`
-		PowerProductionTotal      int                          `json:"powerProductionTotal"`
-		RenewablePercentage       int                          `json:"renewablePercentage"`
-	} `json:"history"`
 }

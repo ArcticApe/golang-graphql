@@ -15,5 +15,8 @@ type CarbonIntensity {
 	datetime: String
 	updatedAt: String
 	createdAt: String
+  emissionFactorType: String
+  isEstimated: Boolean
+  estimationMethod: String
 }
 

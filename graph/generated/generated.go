@@ -43,11 +43,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	CarbonIntensity struct {
-		CarbonIntensity func(childComplexity int) int
-		CreatedAt       func(childComplexity int) int
-		Datetime        func(childComplexity int) int
-		UpdatedAt       func(childComplexity int) int
-		Zone            func(childComplexity int) int
+		CarbonIntensity    func(childComplexity int) int
+		CreatedAt          func(childComplexity int) int
+		Datetime           func(childComplexity int) int
+		EmissionFactorType func(childComplexity int) int
+		EstimationMethod   func(childComplexity int) int
+		IsEstimated        func(childComplexity int) int
+		UpdatedAt          func(childComplexity int) int
+		Zone               func(childComplexity int) int
 	}
 
 	Query struct {
@@ -94,6 +97,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CarbonIntensity.Datetime(childComplexity), true
+
+	case "CarbonIntensity.emissionFactorType":
+		if e.complexity.CarbonIntensity.EmissionFactorType == nil {
+			break
+		}
+
+		return e.complexity.CarbonIntensity.EmissionFactorType(childComplexity), true
+
+	case "CarbonIntensity.estimationMethod":
+		if e.complexity.CarbonIntensity.EstimationMethod == nil {
+			break
+		}
+
+		return e.complexity.CarbonIntensity.EstimationMethod(childComplexity), true
+
+	case "CarbonIntensity.isEstimated":
+		if e.complexity.CarbonIntensity.IsEstimated == nil {
+			break
+		}
+
+		return e.complexity.CarbonIntensity.IsEstimated(childComplexity), true
 
 	case "CarbonIntensity.updatedAt":
 		if e.complexity.CarbonIntensity.UpdatedAt == nil {
@@ -190,6 +214,9 @@ type CarbonIntensity {
 	datetime: String
 	updatedAt: String
 	createdAt: String
+  emissionFactorType: String
+  isEstimated: Boolean
+  estimationMethod: String
 }
 
 `, BuiltIn: false},
@@ -473,6 +500,129 @@ func (ec *executionContext) fieldContext_CarbonIntensity_createdAt(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _CarbonIntensity_emissionFactorType(ctx context.Context, field graphql.CollectedField, obj *model.CarbonIntensity) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CarbonIntensity_emissionFactorType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EmissionFactorType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CarbonIntensity_emissionFactorType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CarbonIntensity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CarbonIntensity_isEstimated(ctx context.Context, field graphql.CollectedField, obj *model.CarbonIntensity) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CarbonIntensity_isEstimated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsEstimated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CarbonIntensity_isEstimated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CarbonIntensity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CarbonIntensity_estimationMethod(ctx context.Context, field graphql.CollectedField, obj *model.CarbonIntensity) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CarbonIntensity_estimationMethod(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EstimationMethod, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CarbonIntensity_estimationMethod(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CarbonIntensity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_liveCarbonIntensity(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_liveCarbonIntensity(ctx, field)
 	if err != nil {
@@ -519,6 +669,12 @@ func (ec *executionContext) fieldContext_Query_liveCarbonIntensity(ctx context.C
 				return ec.fieldContext_CarbonIntensity_updatedAt(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_CarbonIntensity_createdAt(ctx, field)
+			case "emissionFactorType":
+				return ec.fieldContext_CarbonIntensity_emissionFactorType(ctx, field)
+			case "isEstimated":
+				return ec.fieldContext_CarbonIntensity_isEstimated(ctx, field)
+			case "estimationMethod":
+				return ec.fieldContext_CarbonIntensity_estimationMethod(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CarbonIntensity", field.Name)
 		},
@@ -2476,6 +2632,18 @@ func (ec *executionContext) _CarbonIntensity(ctx context.Context, sel ast.Select
 		case "createdAt":
 
 			out.Values[i] = ec._CarbonIntensity_createdAt(ctx, field, obj)
+
+		case "emissionFactorType":
+
+			out.Values[i] = ec._CarbonIntensity_emissionFactorType(ctx, field, obj)
+
+		case "isEstimated":
+
+			out.Values[i] = ec._CarbonIntensity_isEstimated(ctx, field, obj)
+
+		case "estimationMethod":
+
+			out.Values[i] = ec._CarbonIntensity_estimationMethod(ctx, field, obj)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

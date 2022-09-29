@@ -9,11 +9,14 @@ import (
 )
 
 type CarbonIntensity struct {
-	Zone            *string `json:"zone"`
-	CarbonIntensity *int    `json:"carbonIntensity"`
-	Datetime        *string `json:"datetime"`
-	UpdatedAt       *string `json:"updatedAt"`
-	CreatedAt       *string `json:"createdAt"`
+	Zone               *string `json:"zone"`
+	CarbonIntensity    *int    `json:"carbonIntensity"`
+	Datetime           *string `json:"datetime"`
+	UpdatedAt          *string `json:"updatedAt"`
+	CreatedAt          *string `json:"createdAt"`
+	EmissionFactorType *string `json:"emissionFactorType"`
+	IsEstimated        *bool   `json:"isEstimated"`
+	EstimationMethod   *string `json:"estimationMethod"`
 }
 
 type CliqueType string

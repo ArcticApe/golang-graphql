@@ -1,10 +1,3 @@
-enum CliqueType {
-  "People who are elite with parents having money"
-  KOOKS
-  "People who desperate to move up the social ladder to become new versions of themselves and establish new beginnings"
-  POGUES
-}
-
 type Query {
   liveCarbonIntensity(zone: String!): CarbonIntensity
 }

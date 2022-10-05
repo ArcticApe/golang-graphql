@@ -19,6 +19,139 @@ type CarbonIntensity struct {
 	EstimationMethod   *string `json:"estimationMethod"`
 }
 
+type FromStation struct {
+	Type         *string `json:"type"`
+	AtcoCode     *string `json:"atcoCode"`
+	CommonName   *string `json:"commonName"`
+	FareCategory *string `json:"fareCategory"`
+}
+
+type Journey struct {
+	Type        *string      `json:"type"`
+	FromStation *FromStation `json:"fromStation"`
+	ToStation   *ToStation   `json:"toStation"`
+}
+
+type Messages struct {
+	Type        *string `json:"type"`
+	BulletOrder *int    `json:"bulletOrder"`
+	MessageText *string `json:"messageText"`
+}
+
+type PowerBreakdown struct {
+	Zone                      *string                       `json:"zone"`
+	Datetime                  *string                       `json:"datetime"`
+	PowerProductionBreakdown  *TypPowerProductionBreakdown  `json:"powerProductionBreakdown"`
+	PowerProductionTotal      *int                          `json:"powerProductionTotal"`
+	PowerConsumptionBreakdown *TypPowerConsumptionBreakdown `json:"powerConsumptionBreakdown"`
+	PowerConsumptionTotal     *int                          `json:"powerConsumptionTotal"`
+	PowerImportBreakdown      *TypPowerImpBreakdown         `json:"powerImportBreakdown"`
+	PowerImportTotal          *int                          `json:"powerImportTotal"`
+	PowerExportBreakdown      *TypPowerExpBreakdown         `json:"powerExportBreakdown"`
+	PowerExportTotal          *int                          `json:"powerExportTotal"`
+	FossilFreePercentage      *int                          `json:"fossilFreePercentage"`
+	RenewablePercentage       *int                          `json:"renewablePercentage"`
+	UpdatedAt                 *string                       `json:"updatedAt"`
+	CreatedAt                 *string                       `json:"createdAt"`
+}
+
+type Rows struct {
+	Type                   *string             `json:"type"`
+	StartDate              *string             `json:"startDate"`
+	EndDate                *string             `json:"endDate"`
+	PassengerType          *string             `json:"passengerType"`
+	ContactlessPAYOnlyFare *bool               `json:"contactlessPAYOnlyFare"`
+	From                   *string             `json:"from"`
+	To                     *string             `json:"to"`
+	FromStation            *string             `json:"fromStation"`
+	ToStation              *string             `json:"toStation"`
+	DisplayName            *string             `json:"displayName"`
+	DisplayOrder           *int                `json:"displayOrder"`
+	RouteDescription       *string             `json:"routeDescription"`
+	SpecialFare            *bool               `json:"specialFare"`
+	ThroughFare            *bool               `json:"throughFare"`
+	IsTour                 *bool               `json:"isTour"`
+	TicketsAvailable       []*TicketsAvailable `json:"ticketsAvailable"`
+	Messages               []*string           `json:"messages"`
+}
+
+type StopPointFares struct {
+	Header   *string     `json:"header"`
+	Index    *int        `json:"index"`
+	Journey  *Journey    `json:"journey"`
+	Rows     []*Rows     `json:"rows"`
+	Messages []*Messages `json:"messages"`
+}
+
+type TicketTime struct {
+	Type        *string `json:"type"`
+	Description *string `json:"description"`
+}
+
+type TicketType struct {
+	Type        *string `json:"type"`
+	Description *string `json:"description"`
+}
+
+type TicketsAvailable struct {
+	Type          *string     `json:"type"`
+	PassengerType *string     `json:"passengerType"`
+	TicketType    *TicketType `json:"ticketType"`
+	TicketTime    *TicketTime `json:"ticketTime"`
+	Cost          *float64    `json:"cost"`
+	Description   *string     `json:"description"`
+	Mode          *string     `json:"mode"`
+	DisplayOrder  *int        `json:"displayOrder"`
+	Messages      []*string   `json:"messages"`
+}
+
+type ToStation struct {
+	Type         *string `json:"type"`
+	AtcoCode     *string `json:"atcoCode"`
+	CommonName   *string `json:"commonName"`
+	FareCategory *string `json:"fareCategory"`
+}
+
+type TypPowerConsumptionBreakdown struct {
+	BatteryDischarge *string `json:"batteryDischarge"`
+	Biomass          *int    `json:"biomass"`
+	Coal             *int    `json:"coal"`
+	Gas              *int    `json:"gas"`
+	Geothermal       *int    `json:"geothermal"`
+	Hydro            *int    `json:"hydro"`
+	HydroDischarge   *int    `json:"hydroDischarge"`
+	Nuclear          *int    `json:"nuclear"`
+	Oil              *int    `json:"oil"`
+	Solar            *int    `json:"solar"`
+	Unknown          *int    `json:"unknown"`
+	Wind             *int    `json:"wind"`
+}
+
+type TypPowerExpBreakdown struct {
+	BE *int `json:"bE"`
+	FR *int `json:"fR"`
+	IE *int `json:"iE"`
+}
+
+type TypPowerImpBreakdown struct {
+	BE *int `json:"bE"`
+	FR *int `json:"fR"`
+	IE *int `json:"iE"`
+}
+
+type TypPowerProductionBreakdown struct {
+	Biomass    *int `json:"biomass"`
+	Coal       *int `json:"coal"`
+	Gas        *int `json:"gas"`
+	Geothermal *int `json:"geothermal"`
+	Hydro      *int `json:"hydro"`
+	Nuclear    *int `json:"nuclear"`
+	Oil        *int `json:"oil"`
+	Solar      *int `json:"solar"`
+	Unknown    *int `json:"unknown"`
+	Wind       *int `json:"wind"`
+}
+
 type CliqueType string
 
 const (

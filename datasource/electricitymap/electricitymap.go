@@ -69,6 +69,24 @@ func GetLiveCarbonIntensity(params TypAPIParams) (model.CarbonIntensity, error) 
 	return data, err
 }
 
+func GetLivePowerBreakdown(params TypAPIParams) (model.PowerBreakdown, error) {
+	url := fmt.Sprintf("%v/power-breakdown/latest", url)
+	var data model.PowerBreakdown
+
+	header, query := httpQueryBuilder(os.Getenv("AUTH_TOKEN"), params)
+
+	request := http.Request{
+		Url:      url,
+		Method:   "GET",
+		Header:   header,
+		Query:    query,
+		Response: &data,
+	}
+
+	err := request.Send()
+	return data, err
+}
+
 type TypAPIParams struct {
 	Zone               string
 	Lon                string

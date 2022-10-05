@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/golang-graphql/datasource/electricitymap"
+	"github.com/golang-graphql/datasource/transportforlondon"
 	"github.com/golang-graphql/graph/generated"
 	"github.com/golang-graphql/graph/model"
 )
@@ -15,6 +16,27 @@ import (
 func (r *queryResolver) LiveCarbonIntensity(ctx context.Context, zone string) (*model.CarbonIntensity, error) {
 	param := electricitymap.TypAPIParams{Zone: zone}
 	ci, err := electricitymap.GetLiveCarbonIntensity(param)
+	if err != nil {
+		return nil, err
+	}
+	return &ci, nil
+}
+
+// LivePowerBreakdown is the resolver for the livePowerBreakdown field.
+func (r *queryResolver) LivePowerBreakdown(ctx context.Context, zone string) (*model.PowerBreakdown, error) {
+	param := electricitymap.TypAPIParams{Zone: zone}
+	ci, err := electricitymap.GetLivePowerBreakdown(param)
+	if err != nil {
+		return nil, err
+	}
+	return &ci, nil
+}
+
+// LiveStopPointFares is the resolver for the liveStopPointFares field.
+func (r *queryResolver) LiveStopPointFares(ctx context.Context, appkey string) ([]*model.StopPointFares, error) {
+	var param transportforlondon.TflAPIParams
+	param.appkey
+	ci, err := transportforlondon.GetStopPointFares(param)
 	if err != nil {
 		return nil, err
 	}

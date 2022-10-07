@@ -12,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/golang-graphql/datasource/transportforlondon"
 	"github.com/golang-graphql/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -92,7 +93,7 @@ type ComplexityRoot struct {
 	Query struct {
 		LiveCarbonIntensity func(childComplexity int, zone string) int
 		LivePowerBreakdown  func(childComplexity int, zone string) int
-		LiveStopPointFares  func(childComplexity int, appkey string) int
+		LiveStopPointFares  func(childComplexity int) int
 	}
 
 	Rows struct {
@@ -196,7 +197,7 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	LiveCarbonIntensity(ctx context.Context, zone string) (*model.CarbonIntensity, error)
 	LivePowerBreakdown(ctx context.Context, zone string) (*model.PowerBreakdown, error)
-	LiveStopPointFares(ctx context.Context, appkey string) ([]*model.StopPointFares, error)
+	LiveStopPointFares(ctx context.Context) ([]*transportforlondon.StopPointFares, error)
 }
 
 type executableSchema struct {
@@ -467,12 +468,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_liveStopPointFares_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.LiveStopPointFares(childComplexity, args["appkey"].(string)), true
+		return e.complexity.Query.LiveStopPointFares(childComplexity), true
 
 	case "Rows.contactlessPAYOnlyFare":
 		if e.complexity.Rows.ContactlessPAYOnlyFare == nil {
@@ -1005,7 +1001,7 @@ var sources = []*ast.Source{
 type Query {
   liveCarbonIntensity(zone: String!): CarbonIntensity
   livePowerBreakdown(zone: String!): PowerBreakdown
-  liveStopPointFares(appkey: String!): [StopPointFares]
+  liveStopPointFares: [StopPointFares]
 }
 
 type CarbonIntensity {
@@ -1132,7 +1128,7 @@ type Journey {
     passengerType: String
     ticketType: TicketType
     ticketTime: TicketTime
-    cost: Float
+    cost: String
     description: String
     mode: String
     displayOrder: Int
@@ -1203,21 +1199,6 @@ func (ec *executionContext) field_Query_livePowerBreakdown_args(ctx context.Cont
 		}
 	}
 	args["zone"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_liveStopPointFares_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["appkey"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("appkey"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["appkey"] = arg0
 	return args, nil
 }
 
@@ -1587,7 +1568,7 @@ func (ec *executionContext) fieldContext_CarbonIntensity_estimationMethod(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _FromStation_type(ctx context.Context, field graphql.CollectedField, obj *model.FromStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _FromStation_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.FromStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_FromStation_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1628,7 +1609,7 @@ func (ec *executionContext) fieldContext_FromStation_type(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _FromStation_atcoCode(ctx context.Context, field graphql.CollectedField, obj *model.FromStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _FromStation_atcoCode(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.FromStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_FromStation_atcoCode(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1669,7 +1650,7 @@ func (ec *executionContext) fieldContext_FromStation_atcoCode(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _FromStation_commonName(ctx context.Context, field graphql.CollectedField, obj *model.FromStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _FromStation_commonName(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.FromStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_FromStation_commonName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1710,7 +1691,7 @@ func (ec *executionContext) fieldContext_FromStation_commonName(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _FromStation_fareCategory(ctx context.Context, field graphql.CollectedField, obj *model.FromStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _FromStation_fareCategory(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.FromStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_FromStation_fareCategory(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1751,7 +1732,7 @@ func (ec *executionContext) fieldContext_FromStation_fareCategory(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _Journey_type(ctx context.Context, field graphql.CollectedField, obj *model.Journey) (ret graphql.Marshaler) {
+func (ec *executionContext) _Journey_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Journey) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Journey_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1792,7 +1773,7 @@ func (ec *executionContext) fieldContext_Journey_type(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Journey_fromStation(ctx context.Context, field graphql.CollectedField, obj *model.Journey) (ret graphql.Marshaler) {
+func (ec *executionContext) _Journey_fromStation(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Journey) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Journey_fromStation(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1815,9 +1796,9 @@ func (ec *executionContext) _Journey_fromStation(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.FromStation)
+	res := resTmp.(*transportforlondon.FromStation)
 	fc.Result = res
-	return ec.marshalOFromStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐFromStation(ctx, field.Selections, res)
+	return ec.marshalOFromStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐFromStation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Journey_fromStation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1843,7 +1824,7 @@ func (ec *executionContext) fieldContext_Journey_fromStation(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Journey_toStation(ctx context.Context, field graphql.CollectedField, obj *model.Journey) (ret graphql.Marshaler) {
+func (ec *executionContext) _Journey_toStation(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Journey) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Journey_toStation(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1866,9 +1847,9 @@ func (ec *executionContext) _Journey_toStation(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.ToStation)
+	res := resTmp.(*transportforlondon.ToStation)
 	fc.Result = res
-	return ec.marshalOToStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐToStation(ctx, field.Selections, res)
+	return ec.marshalOToStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐToStation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Journey_toStation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1894,7 +1875,7 @@ func (ec *executionContext) fieldContext_Journey_toStation(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Messages_type(ctx context.Context, field graphql.CollectedField, obj *model.Messages) (ret graphql.Marshaler) {
+func (ec *executionContext) _Messages_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Messages) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Messages_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1935,7 +1916,7 @@ func (ec *executionContext) fieldContext_Messages_type(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Messages_bulletOrder(ctx context.Context, field graphql.CollectedField, obj *model.Messages) (ret graphql.Marshaler) {
+func (ec *executionContext) _Messages_bulletOrder(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Messages) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Messages_bulletOrder(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -1976,7 +1957,7 @@ func (ec *executionContext) fieldContext_Messages_bulletOrder(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Messages_messageText(ctx context.Context, field graphql.CollectedField, obj *model.Messages) (ret graphql.Marshaler) {
+func (ec *executionContext) _Messages_messageText(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Messages) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Messages_messageText(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2821,7 +2802,7 @@ func (ec *executionContext) _Query_liveStopPointFares(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().LiveStopPointFares(rctx, fc.Args["appkey"].(string))
+		return ec.resolvers.Query().LiveStopPointFares(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2830,9 +2811,9 @@ func (ec *executionContext) _Query_liveStopPointFares(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.StopPointFares)
+	res := resTmp.([]*transportforlondon.StopPointFares)
 	fc.Result = res
-	return ec.marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐStopPointFares(ctx, field.Selections, res)
+	return ec.marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐStopPointFares(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_liveStopPointFares(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2856,17 +2837,6 @@ func (ec *executionContext) fieldContext_Query_liveStopPointFares(ctx context.Co
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StopPointFares", field.Name)
 		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_liveStopPointFares_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
 	}
 	return fc, nil
 }
@@ -3000,7 +2970,7 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_type(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3041,7 +3011,7 @@ func (ec *executionContext) fieldContext_Rows_type(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_startDate(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_startDate(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_startDate(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3082,7 +3052,7 @@ func (ec *executionContext) fieldContext_Rows_startDate(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_endDate(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_endDate(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_endDate(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3123,7 +3093,7 @@ func (ec *executionContext) fieldContext_Rows_endDate(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_passengerType(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_passengerType(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_passengerType(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3164,7 +3134,7 @@ func (ec *executionContext) fieldContext_Rows_passengerType(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_contactlessPAYOnlyFare(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_contactlessPAYOnlyFare(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_contactlessPAYOnlyFare(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3205,7 +3175,7 @@ func (ec *executionContext) fieldContext_Rows_contactlessPAYOnlyFare(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_from(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_from(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_from(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3246,7 +3216,7 @@ func (ec *executionContext) fieldContext_Rows_from(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_to(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_to(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_to(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3287,7 +3257,7 @@ func (ec *executionContext) fieldContext_Rows_to(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_fromStation(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_fromStation(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_fromStation(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3328,7 +3298,7 @@ func (ec *executionContext) fieldContext_Rows_fromStation(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_toStation(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_toStation(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_toStation(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3369,7 +3339,7 @@ func (ec *executionContext) fieldContext_Rows_toStation(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_displayName(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_displayName(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_displayName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3410,7 +3380,7 @@ func (ec *executionContext) fieldContext_Rows_displayName(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_displayOrder(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_displayOrder(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_displayOrder(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3451,7 +3421,7 @@ func (ec *executionContext) fieldContext_Rows_displayOrder(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_routeDescription(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_routeDescription(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_routeDescription(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3492,7 +3462,7 @@ func (ec *executionContext) fieldContext_Rows_routeDescription(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_specialFare(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_specialFare(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_specialFare(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3533,7 +3503,7 @@ func (ec *executionContext) fieldContext_Rows_specialFare(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_throughFare(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_throughFare(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_throughFare(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3574,7 +3544,7 @@ func (ec *executionContext) fieldContext_Rows_throughFare(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_isTour(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_isTour(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_isTour(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3615,7 +3585,7 @@ func (ec *executionContext) fieldContext_Rows_isTour(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_ticketsAvailable(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_ticketsAvailable(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_ticketsAvailable(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3638,9 +3608,9 @@ func (ec *executionContext) _Rows_ticketsAvailable(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.TicketsAvailable)
+	res := resTmp.([]*transportforlondon.TicketsAvailable)
 	fc.Result = res
-	return ec.marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketsAvailable(ctx, field.Selections, res)
+	return ec.marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketsAvailable(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Rows_ticketsAvailable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3676,7 +3646,7 @@ func (ec *executionContext) fieldContext_Rows_ticketsAvailable(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Rows_messages(ctx context.Context, field graphql.CollectedField, obj *model.Rows) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rows_messages(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.Rows) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Rows_messages(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3717,7 +3687,7 @@ func (ec *executionContext) fieldContext_Rows_messages(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _StopPointFares_header(ctx context.Context, field graphql.CollectedField, obj *model.StopPointFares) (ret graphql.Marshaler) {
+func (ec *executionContext) _StopPointFares_header(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.StopPointFares) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StopPointFares_header(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3758,7 +3728,7 @@ func (ec *executionContext) fieldContext_StopPointFares_header(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _StopPointFares_index(ctx context.Context, field graphql.CollectedField, obj *model.StopPointFares) (ret graphql.Marshaler) {
+func (ec *executionContext) _StopPointFares_index(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.StopPointFares) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StopPointFares_index(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3799,7 +3769,7 @@ func (ec *executionContext) fieldContext_StopPointFares_index(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _StopPointFares_journey(ctx context.Context, field graphql.CollectedField, obj *model.StopPointFares) (ret graphql.Marshaler) {
+func (ec *executionContext) _StopPointFares_journey(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.StopPointFares) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StopPointFares_journey(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3822,9 +3792,9 @@ func (ec *executionContext) _StopPointFares_journey(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Journey)
+	res := resTmp.(*transportforlondon.Journey)
 	fc.Result = res
-	return ec.marshalOJourney2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐJourney(ctx, field.Selections, res)
+	return ec.marshalOJourney2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐJourney(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StopPointFares_journey(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3848,7 +3818,7 @@ func (ec *executionContext) fieldContext_StopPointFares_journey(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _StopPointFares_rows(ctx context.Context, field graphql.CollectedField, obj *model.StopPointFares) (ret graphql.Marshaler) {
+func (ec *executionContext) _StopPointFares_rows(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.StopPointFares) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StopPointFares_rows(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3871,9 +3841,9 @@ func (ec *executionContext) _StopPointFares_rows(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Rows)
+	res := resTmp.([]*transportforlondon.Rows)
 	fc.Result = res
-	return ec.marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐRows(ctx, field.Selections, res)
+	return ec.marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐRows(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StopPointFares_rows(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3925,7 +3895,7 @@ func (ec *executionContext) fieldContext_StopPointFares_rows(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _StopPointFares_messages(ctx context.Context, field graphql.CollectedField, obj *model.StopPointFares) (ret graphql.Marshaler) {
+func (ec *executionContext) _StopPointFares_messages(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.StopPointFares) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_StopPointFares_messages(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3948,9 +3918,9 @@ func (ec *executionContext) _StopPointFares_messages(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Messages)
+	res := resTmp.([]*transportforlondon.Messages)
 	fc.Result = res
-	return ec.marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐMessages(ctx, field.Selections, res)
+	return ec.marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐMessages(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StopPointFares_messages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3974,7 +3944,7 @@ func (ec *executionContext) fieldContext_StopPointFares_messages(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketTime_type(ctx context.Context, field graphql.CollectedField, obj *model.TicketTime) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketTime_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketTime) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketTime_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4015,7 +3985,7 @@ func (ec *executionContext) fieldContext_TicketTime_type(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketTime_description(ctx context.Context, field graphql.CollectedField, obj *model.TicketTime) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketTime_description(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketTime) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketTime_description(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4056,7 +4026,7 @@ func (ec *executionContext) fieldContext_TicketTime_description(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketType_type(ctx context.Context, field graphql.CollectedField, obj *model.TicketType) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketType_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketType_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4097,7 +4067,7 @@ func (ec *executionContext) fieldContext_TicketType_type(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketType_description(ctx context.Context, field graphql.CollectedField, obj *model.TicketType) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketType_description(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketType) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketType_description(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4138,7 +4108,7 @@ func (ec *executionContext) fieldContext_TicketType_description(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_type(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4179,7 +4149,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_type(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_passengerType(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_passengerType(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_passengerType(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4220,7 +4190,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_passengerType(ctx cont
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_ticketType(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_ticketType(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_ticketType(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4243,9 +4213,9 @@ func (ec *executionContext) _TicketsAvailable_ticketType(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.TicketType)
+	res := resTmp.(*transportforlondon.TicketType)
 	fc.Result = res
-	return ec.marshalOTicketType2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketType(ctx, field.Selections, res)
+	return ec.marshalOTicketType2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TicketsAvailable_ticketType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4267,7 +4237,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_ticketType(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_ticketTime(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_ticketTime(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_ticketTime(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4290,9 +4260,9 @@ func (ec *executionContext) _TicketsAvailable_ticketTime(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.TicketTime)
+	res := resTmp.(*transportforlondon.TicketTime)
 	fc.Result = res
-	return ec.marshalOTicketTime2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketTime(ctx, field.Selections, res)
+	return ec.marshalOTicketTime2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TicketsAvailable_ticketTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4314,7 +4284,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_ticketTime(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_cost(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_cost(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_cost(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4337,9 +4307,9 @@ func (ec *executionContext) _TicketsAvailable_cost(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*float64)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TicketsAvailable_cost(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4349,13 +4319,13 @@ func (ec *executionContext) fieldContext_TicketsAvailable_cost(ctx context.Conte
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_description(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_description(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_description(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4396,7 +4366,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_description(ctx contex
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_mode(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_mode(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_mode(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4437,7 +4407,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_mode(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_displayOrder(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_displayOrder(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_displayOrder(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4478,7 +4448,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_displayOrder(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _TicketsAvailable_messages(ctx context.Context, field graphql.CollectedField, obj *model.TicketsAvailable) (ret graphql.Marshaler) {
+func (ec *executionContext) _TicketsAvailable_messages(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.TicketsAvailable) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TicketsAvailable_messages(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4519,7 +4489,7 @@ func (ec *executionContext) fieldContext_TicketsAvailable_messages(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _ToStation_type(ctx context.Context, field graphql.CollectedField, obj *model.ToStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _ToStation_type(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.ToStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ToStation_type(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4560,7 +4530,7 @@ func (ec *executionContext) fieldContext_ToStation_type(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _ToStation_atcoCode(ctx context.Context, field graphql.CollectedField, obj *model.ToStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _ToStation_atcoCode(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.ToStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ToStation_atcoCode(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4601,7 +4571,7 @@ func (ec *executionContext) fieldContext_ToStation_atcoCode(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _ToStation_commonName(ctx context.Context, field graphql.CollectedField, obj *model.ToStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _ToStation_commonName(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.ToStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ToStation_commonName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -4642,7 +4612,7 @@ func (ec *executionContext) fieldContext_ToStation_commonName(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _ToStation_fareCategory(ctx context.Context, field graphql.CollectedField, obj *model.ToStation) (ret graphql.Marshaler) {
+func (ec *executionContext) _ToStation_fareCategory(ctx context.Context, field graphql.CollectedField, obj *transportforlondon.ToStation) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ToStation_fareCategory(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -7667,7 +7637,7 @@ func (ec *executionContext) _CarbonIntensity(ctx context.Context, sel ast.Select
 
 var fromStationImplementors = []string{"FromStation"}
 
-func (ec *executionContext) _FromStation(ctx context.Context, sel ast.SelectionSet, obj *model.FromStation) graphql.Marshaler {
+func (ec *executionContext) _FromStation(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.FromStation) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, fromStationImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -7704,7 +7674,7 @@ func (ec *executionContext) _FromStation(ctx context.Context, sel ast.SelectionS
 
 var journeyImplementors = []string{"Journey"}
 
-func (ec *executionContext) _Journey(ctx context.Context, sel ast.SelectionSet, obj *model.Journey) graphql.Marshaler {
+func (ec *executionContext) _Journey(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.Journey) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, journeyImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -7737,7 +7707,7 @@ func (ec *executionContext) _Journey(ctx context.Context, sel ast.SelectionSet, 
 
 var messagesImplementors = []string{"Messages"}
 
-func (ec *executionContext) _Messages(ctx context.Context, sel ast.SelectionSet, obj *model.Messages) graphql.Marshaler {
+func (ec *executionContext) _Messages(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.Messages) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, messagesImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -7949,7 +7919,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var rowsImplementors = []string{"Rows"}
 
-func (ec *executionContext) _Rows(ctx context.Context, sel ast.SelectionSet, obj *model.Rows) graphql.Marshaler {
+func (ec *executionContext) _Rows(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.Rows) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rowsImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -8038,7 +8008,7 @@ func (ec *executionContext) _Rows(ctx context.Context, sel ast.SelectionSet, obj
 
 var stopPointFaresImplementors = []string{"StopPointFares"}
 
-func (ec *executionContext) _StopPointFares(ctx context.Context, sel ast.SelectionSet, obj *model.StopPointFares) graphql.Marshaler {
+func (ec *executionContext) _StopPointFares(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.StopPointFares) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, stopPointFaresImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -8079,7 +8049,7 @@ func (ec *executionContext) _StopPointFares(ctx context.Context, sel ast.Selecti
 
 var ticketTimeImplementors = []string{"TicketTime"}
 
-func (ec *executionContext) _TicketTime(ctx context.Context, sel ast.SelectionSet, obj *model.TicketTime) graphql.Marshaler {
+func (ec *executionContext) _TicketTime(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.TicketTime) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ticketTimeImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -8108,7 +8078,7 @@ func (ec *executionContext) _TicketTime(ctx context.Context, sel ast.SelectionSe
 
 var ticketTypeImplementors = []string{"TicketType"}
 
-func (ec *executionContext) _TicketType(ctx context.Context, sel ast.SelectionSet, obj *model.TicketType) graphql.Marshaler {
+func (ec *executionContext) _TicketType(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.TicketType) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ticketTypeImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -8137,7 +8107,7 @@ func (ec *executionContext) _TicketType(ctx context.Context, sel ast.SelectionSe
 
 var ticketsAvailableImplementors = []string{"TicketsAvailable"}
 
-func (ec *executionContext) _TicketsAvailable(ctx context.Context, sel ast.SelectionSet, obj *model.TicketsAvailable) graphql.Marshaler {
+func (ec *executionContext) _TicketsAvailable(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.TicketsAvailable) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ticketsAvailableImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -8194,7 +8164,7 @@ func (ec *executionContext) _TicketsAvailable(ctx context.Context, sel ast.Selec
 
 var toStationImplementors = []string{"ToStation"}
 
-func (ec *executionContext) _ToStation(ctx context.Context, sel ast.SelectionSet, obj *model.ToStation) graphql.Marshaler {
+func (ec *executionContext) _ToStation(ctx context.Context, sel ast.SelectionSet, obj *transportforlondon.ToStation) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, toStationImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
@@ -9059,23 +9029,7 @@ func (ec *executionContext) marshalOCarbonIntensity2ᚖgithubᚗcomᚋgolangᚑg
 	return ec._CarbonIntensity(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalFloatContext(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalFloatContext(*v)
-	return graphql.WrapContextMarshaler(ctx, res)
-}
-
-func (ec *executionContext) marshalOFromStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐFromStation(ctx context.Context, sel ast.SelectionSet, v *model.FromStation) graphql.Marshaler {
+func (ec *executionContext) marshalOFromStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐFromStation(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.FromStation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9098,14 +9052,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOJourney2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐJourney(ctx context.Context, sel ast.SelectionSet, v *model.Journey) graphql.Marshaler {
+func (ec *executionContext) marshalOJourney2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐJourney(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.Journey) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Journey(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐMessages(ctx context.Context, sel ast.SelectionSet, v []*model.Messages) graphql.Marshaler {
+func (ec *executionContext) marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐMessages(ctx context.Context, sel ast.SelectionSet, v []*transportforlondon.Messages) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9132,7 +9086,7 @@ func (ec *executionContext) marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraph
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOMessages2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐMessages(ctx, sel, v[i])
+			ret[i] = ec.marshalOMessages2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐMessages(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9146,7 +9100,7 @@ func (ec *executionContext) marshalOMessages2ᚕᚖgithubᚗcomᚋgolangᚑgraph
 	return ret
 }
 
-func (ec *executionContext) marshalOMessages2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐMessages(ctx context.Context, sel ast.SelectionSet, v *model.Messages) graphql.Marshaler {
+func (ec *executionContext) marshalOMessages2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐMessages(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.Messages) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9160,7 +9114,7 @@ func (ec *executionContext) marshalOPowerBreakdown2ᚖgithubᚗcomᚋgolangᚑgr
 	return ec._PowerBreakdown(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐRows(ctx context.Context, sel ast.SelectionSet, v []*model.Rows) graphql.Marshaler {
+func (ec *executionContext) marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐRows(ctx context.Context, sel ast.SelectionSet, v []*transportforlondon.Rows) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9187,7 +9141,7 @@ func (ec *executionContext) marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphql�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalORows2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐRows(ctx, sel, v[i])
+			ret[i] = ec.marshalORows2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐRows(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9201,14 +9155,14 @@ func (ec *executionContext) marshalORows2ᚕᚖgithubᚗcomᚋgolangᚑgraphql�
 	return ret
 }
 
-func (ec *executionContext) marshalORows2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐRows(ctx context.Context, sel ast.SelectionSet, v *model.Rows) graphql.Marshaler {
+func (ec *executionContext) marshalORows2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐRows(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.Rows) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Rows(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐStopPointFares(ctx context.Context, sel ast.SelectionSet, v []*model.StopPointFares) graphql.Marshaler {
+func (ec *executionContext) marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐStopPointFares(ctx context.Context, sel ast.SelectionSet, v []*transportforlondon.StopPointFares) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9235,7 +9189,7 @@ func (ec *executionContext) marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolang�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOStopPointFares2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐStopPointFares(ctx, sel, v[i])
+			ret[i] = ec.marshalOStopPointFares2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐStopPointFares(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9249,7 +9203,7 @@ func (ec *executionContext) marshalOStopPointFares2ᚕᚖgithubᚗcomᚋgolang�
 	return ret
 }
 
-func (ec *executionContext) marshalOStopPointFares2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐStopPointFares(ctx context.Context, sel ast.SelectionSet, v *model.StopPointFares) graphql.Marshaler {
+func (ec *executionContext) marshalOStopPointFares2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐStopPointFares(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.StopPointFares) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9304,21 +9258,21 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTicketTime2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketTime(ctx context.Context, sel ast.SelectionSet, v *model.TicketTime) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketTime2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketTime(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.TicketTime) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._TicketTime(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTicketType2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketType(ctx context.Context, sel ast.SelectionSet, v *model.TicketType) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketType2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketType(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.TicketType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._TicketType(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketsAvailable(ctx context.Context, sel ast.SelectionSet, v []*model.TicketsAvailable) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketsAvailable(ctx context.Context, sel ast.SelectionSet, v []*transportforlondon.TicketsAvailable) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9345,7 +9299,7 @@ func (ec *executionContext) marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolang
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOTicketsAvailable2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketsAvailable(ctx, sel, v[i])
+			ret[i] = ec.marshalOTicketsAvailable2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketsAvailable(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9359,14 +9313,14 @@ func (ec *executionContext) marshalOTicketsAvailable2ᚕᚖgithubᚗcomᚋgolang
 	return ret
 }
 
-func (ec *executionContext) marshalOTicketsAvailable2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐTicketsAvailable(ctx context.Context, sel ast.SelectionSet, v *model.TicketsAvailable) graphql.Marshaler {
+func (ec *executionContext) marshalOTicketsAvailable2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐTicketsAvailable(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.TicketsAvailable) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._TicketsAvailable(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOToStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋgraphᚋmodelᚐToStation(ctx context.Context, sel ast.SelectionSet, v *model.ToStation) graphql.Marshaler {
+func (ec *executionContext) marshalOToStation2ᚖgithubᚗcomᚋgolangᚑgraphqlᚋdatasourceᚋtransportforlondonᚐToStation(ctx context.Context, sel ast.SelectionSet, v *transportforlondon.ToStation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

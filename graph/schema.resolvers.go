@@ -33,14 +33,16 @@ func (r *queryResolver) LivePowerBreakdown(ctx context.Context, zone string) (*m
 }
 
 // LiveStopPointFares is the resolver for the liveStopPointFares field.
-func (r *queryResolver) LiveStopPointFares(ctx context.Context, appkey string) ([]*model.StopPointFares, error) {
-	var param transportforlondon.TflAPIParams
-	param.appkey
-	ci, err := transportforlondon.GetStopPointFares(param)
+func (r *queryResolver) LiveStopPointFares(ctx context.Context) ([]*transportforlondon.StopPointFares, error) {
+	ci, err := transportforlondon.GetStopPointFares()
 	if err != nil {
 		return nil, err
 	}
-	return &ci, nil
+	var result []*transportforlondon.StopPointFares
+	for _, s := range ci {
+		result = append(result, &s)
+	}
+	return result, nil
 }
 
 // Query returns generated.QueryResolver implementation.

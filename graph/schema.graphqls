@@ -1,159 +1,149 @@
-enum CliqueType {
-  "People who are elite with parents having money"
-  KOOKS
-  "People who desperate to move up the social ladder to become new versions of themselves and establish new beginnings"
-  POGUES
-}
-
 type Query {
   liveCarbonIntensity(zone: String!): CarbonIntensity
   livePowerBreakdown(zone: String!): PowerBreakdown
-  liveStopPointFares(appkey: String!): [StopPointFares]
+  liveStopPointFares: [StopPointFares]
 }
 
 type CarbonIntensity {
-	zone: String
-	carbonIntensity: Int
-	datetime: String
-	updatedAt: String
-	createdAt: String
+  zone: String
+  carbonIntensity: Int
+  datetime: String
+  updatedAt: String
+  createdAt: String
   emissionFactorType: String
   isEstimated: Boolean
   estimationMethod: String
 }
 
 type PowerBreakdown {
-  zone:                      String                      
-	datetime:                  String                       
-	powerProductionBreakdown:  TypPowerProductionBreakdown
-	powerProductionTotal:      Int                          
-	powerConsumptionBreakdown: TypPowerConsumptionBreakdown
-	powerConsumptionTotal:     Int                          
-	powerImportBreakdown:      TypPowerImpBreakdown   
-	powerImportTotal:          Int                          
-	powerExportBreakdown:      TypPowerExpBreakdown    
-	powerExportTotal:          Int                          
-	fossilFreePercentage:      Int                         
-	renewablePercentage:       Int                         
-	updatedAt:                 String                      
-	createdAt:                 String                      
+  zone: String
+  datetime: String
+  powerProductionBreakdown: TypPowerProductionBreakdown
+  powerProductionTotal: Int
+  powerConsumptionBreakdown: TypPowerConsumptionBreakdown
+  powerConsumptionTotal: Int
+  powerImportBreakdown: TypPowerImpBreakdown
+  powerImportTotal: Int
+  powerExportBreakdown: TypPowerExpBreakdown
+  powerExportTotal: Int
+  fossilFreePercentage: Int
+  renewablePercentage: Int
+  updatedAt: String
+  createdAt: String
 }
 
 type TypPowerProductionBreakdown {
-  biomass:    Int 
-	coal:       Int 
-	gas:        Int 
-	geothermal: Int 
-	hydro:      Int 
-	nuclear:    Int 
-	oil:        Int 
-	solar:      Int 
-	unknown:    Int 
-	wind:       Int 
+  biomass: Int
+  coal: Int
+  gas: Int
+  geothermal: Int
+  hydro: Int
+  nuclear: Int
+  oil: Int
+  solar: Int
+  unknown: Int
+  wind: Int
 }
 
 type TypPowerConsumptionBreakdown {
-  batteryDischarge: String 
-	biomass:          Int    
-	coal:             Int    
-	gas:              Int    
-	geothermal:       Int    
-	hydro:            Int    
-	hydroDischarge:   Int    
-	nuclear:          Int    
-	oil:              Int    
-	solar:            Int    
-	unknown:          Int    
-	wind:             Int    
+  batteryDischarge: String
+  biomass: Int
+  coal: Int
+  gas: Int
+  geothermal: Int
+  hydro: Int
+  hydroDischarge: Int
+  nuclear: Int
+  oil: Int
+  solar: Int
+  unknown: Int
+  wind: Int
 }
 
 type TypPowerImpBreakdown {
-  	bE:     Int 
-	fR:     Int 
-	iE:     Int
-  
+  bE: Int
+  fR: Int
+  iE: Int
 }
 
 type TypPowerExpBreakdown {
-  	bE:     Int 
-	fR:     Int 
-	iE:     Int
-
+  bE: Int
+  fR: Int
+  iE: Int
 }
 
 type StopPointFares {
-header: String
-index: Int
-journey: Journey
-rows: [Rows]
-messages: [Messages]
-
+  header: String
+  index: Int
+  journey: Journey
+  rows: [Rows]
+  messages: [Messages]
 }
 
 type Journey {
-    type: String
-    fromStation: FromStation
-    toStation: ToStation
+  type: String
+  fromStation: FromStation
+  toStation: ToStation
 }
 
- type FromStation {
-    type: String
-    atcoCode: String
-    commonName: String
-    fareCategory: String
-  }
+type FromStation {
+  type: String
+  atcoCode: String
+  commonName: String
+  fareCategory: String
+}
 
-  type ToStation {
-    type: String
-    atcoCode: String
-    commonName: String
-    fareCategory: String
-  }
+type ToStation {
+  type: String
+  atcoCode: String
+  commonName: String
+  fareCategory: String
+}
 
-  type Rows {
-    type: String
-    startDate: String
-    endDate: String
-    passengerType: String
-    contactlessPAYOnlyFare: Boolean
-    from: String
-    to: String
-    fromStation: String
-    toStation: String
-    displayName: String
-    displayOrder: Int
-    routeDescription: String
-    specialFare: Boolean
-    throughFare: Boolean
-    isTour: Boolean
-    ticketsAvailable: [TicketsAvailable]
-    messages: [String]
-  }
+type Rows {
+  type: String
+  startDate: String
+  endDate: String
+  passengerType: String
+  contactlessPAYOnlyFare: Boolean
+  from: String
+  to: String
+  fromStation: String
+  toStation: String
+  displayName: String
+  displayOrder: Int
+  routeDescription: String
+  specialFare: Boolean
+  throughFare: Boolean
+  isTour: Boolean
+  ticketsAvailable: [TicketsAvailable]
+  messages: [String]
+}
 
-  type TicketsAvailable {
-    type: String
-    passengerType: String
-    ticketType: TicketType
-    ticketTime: TicketTime
-    cost: Float
-    description: String
-    mode: String
-    displayOrder: Int
-    messages: [String]
-  }
+type TicketsAvailable {
+  type: String
+  passengerType: String
+  ticketType: TicketType
+  ticketTime: TicketTime
+  cost: String
+  description: String
+  mode: String
+  displayOrder: Int
+  messages: [String]
+}
 
-  type TicketType {
-    type: String
-    description: String 
-  }
+type TicketType {
+  type: String
+  description: String
+}
 
-  type TicketTime {
-    type: String
-    description: String
-  }
+type TicketTime {
+  type: String
+  description: String
+}
 
-  type Messages {
-    type: String
-    bulletOrder: Int
-    messageText: String
-  }
+type Messages {
+  type: String
+  bulletOrder: Int
+  messageText: String
+}

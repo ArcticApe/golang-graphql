@@ -42,6 +42,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
+  # - "github.com/golang-graphql/datasource/transportforlondon"
 #  - "github.com/golang-graphql/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
@@ -50,6 +51,24 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  StopPointFares:
+    model: github.com/golang-graphql/datasource/transportforlondon.StopPointFares
+  Journey:
+    model: github.com/golang-graphql/datasource/transportforlondon.Journey
+  FromStation:
+    model: github.com/golang-graphql/datasource/transportforlondon.FromStation
+  ToStation:
+    model: github.com/golang-graphql/datasource/transportforlondon.ToStation
+  Rows:
+    model: github.com/golang-graphql/datasource/transportforlondon.Rows
+  TicketsAvailable:
+    model: github.com/golang-graphql/datasource/transportforlondon.TicketsAvailable
+  TicketType:
+    model: github.com/golang-graphql/datasource/transportforlondon.TicketType
+  TicketTime:
+    model: github.com/golang-graphql/datasource/transportforlondon.TicketTime
+  Messages:
+    model: github.com/golang-graphql/datasource/transportforlondon.Messages
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID
